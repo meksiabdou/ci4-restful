@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "codeigniter4/framework": "^4",
+        "agungsugiarto/codeigniter4-cors": "^1.0",
         "myth/auth": "^1.0@beta"
     },
     "autoload": {
