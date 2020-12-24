@@ -63,6 +63,14 @@ class QueryModel extends Model
         return $this->update();
     }
 
+    public function deleteData($where){
+
+        foreach ($where as $key => $value) {
+            $this->primaryKey = $key;
+            return $this->delete($value, true);
+        }
+    }
+
     public function getDataById($where)
     {
 
