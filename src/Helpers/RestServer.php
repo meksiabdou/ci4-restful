@@ -26,6 +26,7 @@ class RestServer extends ResourceController
         "coupons",
         "storesById",
         "categories",
+        "getPages"
     ];
 
     protected $users;
