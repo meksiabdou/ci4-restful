@@ -2,19 +2,18 @@
 
 namespace CI4Restful\Helpers;
 
-use Myth\Auth\Models\loginModel;
+use Myth\Auth\Models\LoginModel;
 
 class Token
 {
 
     private $loginModel;
-    private $config;
+    public $rememberLength;
 
     public function __construct($rememberLength = 5)
     {
-        $this->loginModel = new loginModel();
-        $this->config = config('Auth');
-        $this->config->rememberLength = $rememberLength * DAY;
+        $this->loginModel = new LoginModel();
+        $this->rememberLength = $rememberLength * DAY;
     }
 
     function generateToken($user)
@@ -39,7 +38,7 @@ class Token
 
         $selector  = bin2hex(random_bytes(12));
         $validator = bin2hex(random_bytes(20));
-        $expires   = date('Y-m-d H:i:s', time() + $this->config->rememberLength);
+        $expires   = date('Y-m-d H:i:s', time() + $this->rememberLength);
 
         $token = $selector . ':' . $validator;
 
