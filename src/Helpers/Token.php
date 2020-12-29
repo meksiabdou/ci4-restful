@@ -3,6 +3,7 @@
 namespace CI4Restful\Helpers;
 
 use Myth\Auth\Models\LoginModel;
+use CI4Restful\Models\QueryModel;
 
 class Token
 {
@@ -26,12 +27,12 @@ class Token
         unset($user->activate_hash);
 
         
-        $user->token = $this->generate_key($user->id);
+        $user->token = $this->generate_key($user);
 
         return $user;
     }
 
-    private function generate_key($uid)
+    private function generate_key($user)
     {
 
         $this->loginModel->purgeOldRememberTokens();
@@ -39,11 +40,21 @@ class Token
         $selector  = bin2hex(random_bytes(12));
         $validator = bin2hex(random_bytes(20));
         $expires   = date('Y-m-d H:i:s', time() + $this->rememberLength);
+        $device = $user->device;
 
         $token = $selector . ':' . $validator;
 
         // Store it in the database
-        $this->loginModel->rememberUser($uid, $selector, hash('sha256', $validator), $expires);
+        $query = new QueryModel('auth_tokens');
+
+        $query->insertToDb([
+            'user_id' => $user->id,
+            'selector' => $selector,
+            'hashedValidator' => hash('sha256', $validator),
+            'device' => $device,
+            'expires' => $expires,
+        ]);
+        //$this->loginModel->rememberUser($user->id, $selector, hash('sha256', $validator), $expires);
 
         // Save it to the user's browser in a cookie.
 
