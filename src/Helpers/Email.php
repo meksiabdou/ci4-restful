@@ -22,15 +22,16 @@ class Email
     public function __construct()
     {
 
+        //contact@recashit.com
         $this->config = new CEmail();
-
-        $this->config->fromEmail = "meksiabdou@dz-web.eu";
-        $this->config->fromName = "Meksi Abdennour";
+        $this->config->fromEmail = "no-reply@recashit.com";
+        $this->config->fromName = "Recashit - Cashback";
         $this->config->protocol = "smtp";
-        $this->config->SMTPHost = "dz-web.eu";
-        $this->config->SMTPUser = "meksiabdou@dz-web.eu";
-        $this->config->SMTPPass = "WwqpObIKyq";
-        $this->config->SMTPPort = 25;
+        $this->config->SMTPHost = "";
+        $this->config->SMTPUser = "";
+        $this->config->SMTPPass = "";
+
+        $this->config->SMTPPort = 587;
         $this->config->SMTPTimeout = 30;
         $this->config->SMTPCrypto = "";
 
@@ -93,10 +94,19 @@ class Email
     }
 
 
-    public function setConfig($user, $subject, $message){
+    public function setConfig($configs)
+    {
 
-        $this->user = $user;
-        $this->subject = $subject;
-        $this->message = $message; //view('emails/forgot', ['hash' => $this->user->reset_hash]);
+        foreach ($configs as $key => $value) {
+            if (property_exists($this->config, $key)) 
+            {
+                $this->config->$key = $value;
+            }
+        }
+
+        $this->user = (object)['email' => $configs->email];
+        $this->subject = $configs->subject;
+        $this->message = $configs->message; 
+
     }
 }
