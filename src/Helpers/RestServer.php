@@ -31,7 +31,9 @@ class RestServer extends ResourceController
         "storesById",
         "categories",
         "loginWithSocialMedia",
-        'getPages'
+        'getPages',
+        'emailing',
+        'localisation'
     ];
 
     protected $users;
@@ -48,18 +50,20 @@ class RestServer extends ResourceController
         if ($auth === true) {
             return $this->$method(...$params);
         } else {
-            return $this->respond(["status" => false, "error" => 'token !!'], 403);
+            return $this->respond(["status" => false, "code" => [3001] ,"error" => 'token !!', 'description' => ''], 403);
         }
     }
 
     private function auth($method, $params)
     {
 
+        $this->config = new Configs();
 
         try {
 
-            $this->config = new Configs();
-
+            $post = [];
+            $get = $this->request->getGet();
+            $agent = $this->request->getUserAgent();
 
             $data = [
                 'token' => null,
@@ -67,7 +71,14 @@ class RestServer extends ResourceController
                 'ip_address' => $this->request->getIPAddress(),
                 'method_request' => $this->request->getMethod(TRUE),
                 'method' => $method,
-                'params' => json_encode($params, true),
+                'params' => json_encode(['params' => $params, 'post' => $post, 'get' => $get], true),
+                'agent' => json_encode([
+                    'robot' => $agent->isRobot() ? $this->agent->robot(): false,
+                    'browser' => $agent->isBrowser() ?  $agent->getBrowser().'.'.$agent->getVersion() : false,
+                    'mobile' => $agent->isMobile() ? $agent->getMobile(): false,
+                    'platform' => $agent->getPlatform(),
+                    'referrer' => $agent->isReferral()? $agent->getReferrer(): false,
+                ], true),
                 'date' => Time::createFromTimestamp(time(), $this->config->appTimezone),
                 'authorized' => 0,
             ];

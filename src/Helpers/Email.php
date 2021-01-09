@@ -24,12 +24,26 @@ class Email
 
         //contact@recashit.com
         $this->config = new CEmail();
-        $this->config->fromEmail = "no-reply@recashit.com";
+        $this->config->fromEmail = "no-reply@recashit.net";
         $this->config->fromName = "Recashit - Cashback";
         $this->config->protocol = "smtp";
-        $this->config->SMTPHost = "";
-        $this->config->SMTPUser = "";
-        $this->config->SMTPPass = "";
+
+
+        /*$this->config->SMTPHost = "dz-web.eu";
+        $this->config->SMTPUser = "meksiabdou@dz-web.eu";
+        $this->config->SMTPPass = "ZtXGOHGZhFfQ2oLR";*/
+
+
+        /*
+        $this->config->SMTPHost = "smtp.sendgrid.net";
+        $this->config->SMTPUser = "apikey";
+        $this->config->SMTPPass = "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";
+        */
+
+
+        $this->config->SMTPHost = "smtp.ionos.com";
+        $this->config->SMTPUser = "no-reply@recashit.net";
+        $this->config->SMTPPass = "ak7474,@OZERVE";
 
         $this->config->SMTPPort = 587;
         $this->config->SMTPTimeout = 30;

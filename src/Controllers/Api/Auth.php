@@ -38,7 +38,7 @@ class Auth extends RestServer
 		$this->users = new UserModel();
 		$this->loginModel = new LoginModel();
 		$this->config->defaultUserGroup = 'user';
-		$this->config->requireActivation = false;
+		$this->config->requireActivation = true;
 		$this->config->activeResetter = true;
 		$this->config->allowRemembering = true;
 		$this->config->validFields = ["email"];
@@ -55,10 +55,10 @@ class Auth extends RestServer
 		if (is_array($errors)) {
 			foreach ($errors as $key => $value) {
 				if (intval($value) === 0) {
-					if ($value === "Password must not be a common password.") {
+					if ($key === 'password' || $value === "Password must not be a common password.") {
 						$value = 3009;
 					} else {
-						$value = null;
+						$value = 3002;
 					}
 				}
 				array_push($_errors, $value);
@@ -83,6 +83,7 @@ class Auth extends RestServer
 		$rules = [
 			'identity'	=> 'required',
 			'password' => 'required',
+			'device' => 'required',
 		];
 
 		if ($this->config->validFields == ['email']) {
@@ -95,6 +96,7 @@ class Auth extends RestServer
 
 		$identity = $this->request->getPost('identity');
 		$password = $this->request->getPost('password');
+		$device = $this->request->getPost('device');
 		$remember = false;
 
 
@@ -110,6 +112,8 @@ class Auth extends RestServer
 			}
 
 			$user = $this->auth->user();
+
+			$user->device = $device;
 
 			if ($user) {
 				$user =  $token->generateToken($user);
@@ -177,9 +181,10 @@ class Auth extends RestServer
 			],
 			'password' => [
 				'label'  => 'password',
-				'rules'  => "required|strong_password",
+				'rules'  => "required|min_length[8]",
 				'errors' => [
-					'strong_password' => 3009,
+					//'strong_password' => 3009,
+					'min_length' => 3009,
 					'required' => 3008,
 				]
 			],
@@ -206,17 +211,19 @@ class Auth extends RestServer
 		
 		if (!$this->validate($rules)) {
 			$code = $this->handleErrors($this->validator->getErrors());
-
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
 		$this->config->personalFields = ['fullname', 'phone', 'country'];
+		$this->config->validFields = ["email"];
 
 		// Save the user
 		$allowedPostFields = array_merge(['password'], $this->config->validFields, $this->config->personalFields);
 
 		$userData = $this->request->getPost($allowedPostFields);
+		
 		$userData['username'] = explode("@", $this->request->getPost('email'))[0];
+		
 		$userData['referral_code'] = random_string('alnum', 8);
 
 		$user = new User($userData);
@@ -340,14 +347,47 @@ class Auth extends RestServer
 		);
 
 		$rules = [
-			'token'		=> 'required',
-			'email'		=> 'required|valid_email',
-			'password'	 => 'required|strong_password',
-			'confirmPassword' => 'required|matches[password]',
+			'token' => [
+				'label'  => 'token',
+				'rules'  => "required",
+				'errors' => [
+					'required' => 3008,
+				]
+			],
+			'email' => [
+				'label'  => 'email',
+				'rules'  => "required|valid_email",
+				'errors' => [
+					'valid_email' => 3006,
+					'required' => 3008,
+				]
+			],
+			'password' => [
+				'label'  => 'password',
+				'rules'  => "required|min_length[8]",
+				'errors' => [
+					//'strong_password' => 3009,
+					'min_length' => 3009,
+					'required' => 3008,
+				]
+			],
+			'confirmPassword' => [
+				'label'  => 'confirmPassword',
+				'rules'  => "required|matches[password]",
+				'errors' => [
+					'matches' => 3009,
+					'required' => 3008,
+				]
+			],
 		];
 
-		if (!$this->validate($rules)) {
+		/*if (!$this->validate($rules)) {
 			return $this->response_json(['code' => [3002], 'description' => $this->validator->getErrors()], false);
+		}*/
+
+		if (!$this->validate($rules)) {
+			$code = $this->handleErrors($this->validator->getErrors());
+			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
 		$user = $this->users->where('email', $this->request->getPost('email'))
