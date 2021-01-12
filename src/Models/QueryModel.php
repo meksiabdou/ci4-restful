@@ -4,6 +4,7 @@ namespace CI4Restful\Models;
 
 use CodeIgniter\Model;
 
+
 class QueryModel extends Model
 {
 
@@ -69,6 +70,17 @@ class QueryModel extends Model
             $this->primaryKey = $key;
             return $this->delete($value, true);
         }
+    }
+
+    public function deleteDataWhere($where)
+    {
+
+        if (!is_array($where)) 
+        {
+            return false;
+        }
+
+        return $this->builder($this->table)->where($where)->delete();
     }
 
     public function getDataById($where)

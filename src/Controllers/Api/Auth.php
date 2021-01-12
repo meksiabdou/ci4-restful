@@ -323,7 +323,7 @@ class Auth extends RestServer
 		$sent = $this->email->forgotEmailSent($user);
 
 		if (!$sent) {
-			return $this->response_json(['code' => [3004], 'description' => "mail not send"], false);
+			return $this->response_json(['code' => [3005], 'description' => "mail not send"], false);
 		}
 
 		return $this->response_json(['code' => [2001], 'description' => "forgotEmailSent"], true);
