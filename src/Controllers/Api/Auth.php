@@ -38,13 +38,13 @@ class Auth extends RestServer
 		$this->users = new UserModel();
 		$this->loginModel = new LoginModel();
 		$this->config->defaultUserGroup = 'user';
-		$this->config->requireActivation = true;
 		$this->config->activeResetter = true;
 		$this->config->allowRemembering = true;
 		$this->config->validFields = ["email"];
 		$this->isReferralsPrograme = true;
 
 		helper('text');
+
 	}
 
 
@@ -137,6 +137,8 @@ class Auth extends RestServer
 	{
 		// Check if registration is allowed
 		$this->config->allowRegistration = true;
+		$this->config->requireActivation = true;
+
 
 		// Validate here first, since some things,
 		// like the password, can only be validated properly here.
@@ -205,6 +207,13 @@ class Auth extends RestServer
 					'min_length' => 3008,
 				]
 			],
+			'wilaya' => [
+				'label'  => 'wilaya',
+				'rules'  => "required",
+				'errors' => [
+					'required' => 3008,
+				]
+			],
 		];
 
 		//return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
@@ -214,7 +223,7 @@ class Auth extends RestServer
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
-		$this->config->personalFields = ['fullname', 'phone', 'country'];
+		$this->config->personalFields = ['fullname', 'phone', 'country', 'wilaya'];
 		$this->config->validFields = ["email"];
 
 		// Save the user
@@ -322,11 +331,11 @@ class Auth extends RestServer
 
 		$sent = $this->email->forgotEmailSent($user);
 
-		if (!$sent) {
-			return $this->response_json(['code' => [3004], 'description' => "mail not send"], false);
+		if ($sent === true) {
+			return $this->response_json(['code' => [2001], 'description' => "forgotEmailSent"], true);
 		}
 
-		return $this->response_json(['code' => [2001], 'description' => "forgotEmailSent"], true);
+		return $this->response_json(['code' => [3005], 'description' => "mail not send", 'error' => $sent], false);
 	}
 
 	/**

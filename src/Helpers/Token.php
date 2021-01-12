@@ -10,11 +10,14 @@ class Token
 
     private $loginModel;
     public $rememberLength;
+    public $response;
 
     public function __construct($rememberLength = 5)
     {
         $this->loginModel = new LoginModel();
         $this->rememberLength = $rememberLength * DAY;
+        //$this->response = service('response');
+
     }
 
     function generateToken($user)
@@ -29,6 +32,19 @@ class Token
         
         $user->token = $this->generate_key($user);
 
+        /*$cookie = [
+            'name'   => 'token',
+            'value'  => $user->token,
+            'expire' => time() + $this->rememberLength,
+            'domain' => 'cdr.loc',
+            'path'   => '/',
+            'prefix' => '',
+            'secure' => FALSE,
+            'httponly' => FALSE
+        ];
+    
+        $this->response->setCookie($cookie);
+        */
         return $user;
     }
 
