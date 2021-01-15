@@ -44,7 +44,6 @@ class Auth extends RestServer
 		$this->isReferralsPrograme = true;
 
 		helper('text');
-
 	}
 
 
@@ -70,9 +69,12 @@ class Auth extends RestServer
 
 	public function logout()
 	{
-		$uid = $this->request->getPost('login');
+		if ($this->request->getPost('login')) {
+			$uid = $this->request->getPost('login');
 
-		$this->loginModel->purgeRememberTokens($uid);
+			$this->loginModel->purgeRememberTokens($uid);
+		}
+
 
 		return $this->response_json([], true);
 	}
@@ -125,7 +127,6 @@ class Auth extends RestServer
 				}
 				return $this->response_json($user, true);
 			}
-
 		} catch (Exception $e) {
 
 			return $this->response_json(['code' => [3002], 'description' => $e->getMessage()], false);
@@ -217,7 +218,7 @@ class Auth extends RestServer
 		];
 
 		//return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
-		
+
 		if (!$this->validate($rules)) {
 			$code = $this->handleErrors($this->validator->getErrors());
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
@@ -230,9 +231,9 @@ class Auth extends RestServer
 		$allowedPostFields = array_merge(['password'], $this->config->validFields, $this->config->personalFields);
 
 		$userData = $this->request->getPost($allowedPostFields);
-		
+
 		$userData['username'] = explode("@", $this->request->getPost('email'))[0];
-		
+
 		$userData['referral_code'] = random_string('alnum', 8);
 
 		$user = new User($userData);
@@ -418,7 +419,7 @@ class Auth extends RestServer
 		$user->reset_at 		= date('Y-m-d H:i:s');
 		$user->reset_expires    = null;
 		$user->force_pass_reset = false;
-		
+
 		$this->users->save($user);
 
 		return $this->response_json(['code' => [2002], 'description' => 'resetSuccess'], true);
@@ -486,7 +487,7 @@ class Auth extends RestServer
 			}
 			return $this->response_json(['code' => [2002], 'description' => 'Edited successfully'], true);
 		} catch (Exception $e) {
-			return $this->response_json(['code' => [3012], 'description' => $e->getMessage()], false);
+			return $this->response_json(['code' => [2002], 'description' => $e->getMessage()], true);
 		}
 	}
 
@@ -512,9 +513,10 @@ class Auth extends RestServer
 			],
 			'newPassword' => [
 				'label'  => 'newPassword',
-				'rules'  => "required|strong_password",
+				'rules'  => "required|min_length[8]",
 				'errors' => [
-					'strong_password' => 3009,
+					//'strong_password' => 3009,
+					'min_length' => 3009,
 					'required' => 3008,
 				]
 			],
