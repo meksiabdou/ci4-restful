@@ -452,12 +452,34 @@ class Auth extends RestServer
 					'required' => 3008,
 				]
 			],
+			'oldEmail' => [
+				'label'  => 'oldEmail',
+				'rules'  => "required|valid_email",
+				'errors' => [
+					'valid_email' => 3006,
+					'required' => 3008,
+				]
+			],
+			'password' => [
+				'label'  => 'password',
+				'rules'  => "required",
+				'errors' => [
+					'required' => 3008,
+				]
+			],
 			'phone' => [
 				'label'  => 'phone',
 				'rules'  => "required|integer|is_unique[users.phone,id,$uid]",
 				'errors' => [
 					'is_unique' => 3007,
 					'integer' => 3007,
+					'required' => 3008,
+				]
+			],
+			'wilaya' => [
+				'label'  => 'wilaya',
+				'rules'  => "required",
+				'errors' => [
 					'required' => 3008,
 				]
 			],
@@ -468,16 +490,20 @@ class Auth extends RestServer
 			$code = $this->handleErrors($this->validator->getErrors());
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
+		
+		$email = $this->request->getPost('oldEmail');
+		$password = $this->request->getPost('password');
 
-		$user = $this->users->where('id', $uid)->first();
-
-		if (!$user) {
-			return $this->response_json(['code' => [3002], 'description' => ''], false);
+		if (!$this->auth->attempt(['email' => $email, 'password' => $password], false)) {
+			return $this->response_json(['code' => [3002], 'description' => $this->auth->error()], false);
 		}
+
+		$user = $this->auth->user();
 
 		$user->fullname = $this->request->getPost('fullname');
 		$user->phone = $this->request->getPost('phone');
 		$user->email = $this->request->getPost('email');
+		$user->wilaya = $this->request->getPost('wilaya');
 
 		try {
 			$update = $this->users->save($user);
