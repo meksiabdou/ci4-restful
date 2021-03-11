@@ -24,15 +24,14 @@ class Email
 
         //contact@recashit.com
         $this->config = new CEmail();
-        $this->config->fromEmail = "no-reply@recashit.net";
-        $this->config->fromName = "Recashit - Cashback";
+        $this->config->fromName = "";
         $this->config->protocol = "smtp";
 
 
-        $this->config->fromEmail = "meksiabdou@dz-web.eu";
-        $this->config->SMTPHost = "dz-web.eu";
-        $this->config->SMTPUser = "meksiabdou@dz-web.eu";
-        $this->config->SMTPPass = "iyFhrDOlUvOVw4q8";
+        $this->config->fromEmail = "cantact@example.eu";
+        $this->config->SMTPHost = "example.eu";
+        $this->config->SMTPUser = "cantact@example.eu";
+        $this->config->SMTPPass = "";
 
 
         /*$this->config->SMTPHost = "smtp.ionos.com";

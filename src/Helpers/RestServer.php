@@ -45,6 +45,7 @@ class RestServer extends ResourceController
 
     public function _remap($method, ...$params)
     {
+
         $auth = $this->auth($method, $params);
 
         if ($auth === true) {
@@ -94,7 +95,7 @@ class RestServer extends ResourceController
 
                 if (in_array($method, $this->array_methods)) {
 
-                    if (!in_array($this->token, $this->token_app)) {
+                    if (!in_array($this->token, $this->token_app) || $agent->isRobot()) {
                         $data['authorized'] = 0;
                         $status = false;
                     } else {
@@ -159,5 +160,15 @@ class RestServer extends ResourceController
     {
         $this->format = 'json';
         return $this->respond(["status" => $status, "results" => $data], $statusCode);
+    }
+
+
+    public function setMethod($method = [])
+    {
+        if(isset($method)){
+            $this->array_methods = [...$this->array_methods, ...$method];
+        }
+
+        //return  $this->array_methods;
     }
 }

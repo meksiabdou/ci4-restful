@@ -236,6 +236,7 @@ class Auth extends RestServer
 
 		$userData['referral_code'] = random_string('alnum', 8);
 
+
 		$user = new User($userData);
 
 		$this->config->requireActivation !== false ? $user->generateActivateHash() : $user->activate();
@@ -244,6 +245,7 @@ class Auth extends RestServer
 
 		$this->config->defaultUserGroup = 'user';
 
+		
 		if (!empty($this->config->defaultUserGroup)) {
 			$users = $this->users->withGroup($this->config->defaultUserGroup);
 		}
@@ -257,9 +259,8 @@ class Auth extends RestServer
 		if ($this->isReferralsPrograme && $this->request->getPost('referral_code')) {
 			$queryRef = new QueryModel('referrals');
 			$referral = $this->users->where('referral_code', $this->request->getPost('referral_code'))->first();
-			$queryRef->insertToDb([["user_id" => $users->id, "referral_id" => $referral->id]]);
+			$queryRef->insertToDb(["user_id" => $users->id, "referral_id" => $referral->id]);
 		}
-
 
 		if ($this->config->requireActivation !== false) {
 
@@ -272,7 +273,7 @@ class Auth extends RestServer
 		}
 
 		// Success!
-		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created"], true);
+		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created", $users], true);
 	}
 
 	public function reSendActivateAccount()
@@ -302,7 +303,7 @@ class Auth extends RestServer
 
 		// Success!
 		if ($sent) {
-			return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created"], true);
+			return $this->response_json(['code' => [2003], 'description' => "Successfully Send"], true);
 		}
 
 		return $this->response_json(['code' => [3004], 'description' => "mail not send"], false);
@@ -490,7 +491,7 @@ class Auth extends RestServer
 			$code = $this->handleErrors($this->validator->getErrors());
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
-		
+
 		$email = $this->request->getPost('oldEmail');
 		$password = $this->request->getPost('password');
 

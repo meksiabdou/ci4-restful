@@ -17,4 +17,23 @@ class UserModel extends MythModel
         'password_hash' => 'required',
         'fullname' => 'required',
     ];
+
+
+    public function getUserbyId($id)
+    {
+        $user = $this->where('id', $id)->first();
+
+        if($user)
+        {
+            unset($user->password_hash);
+            unset($user->reset_hash);
+            unset($user->reset_at);
+            unset($user->reset_expires);
+            unset($user->activate_hash);
+
+            return $user;
+        }
+
+        return false;
+    }
 }
