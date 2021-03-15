@@ -49,7 +49,11 @@ class RestServer extends ResourceController
         $auth = $this->auth($method, $params);
 
         if ($auth === true) {
-            return $this->$method(...$params);
+            try {
+                return $this->$method(...$params);
+            } catch (Exception $e) {
+                return $this->respond(["status" => false, "code" => [3001], "error" => 'Error 500',  'description' => CI_DEBUG ? $e->getMessage() : '']);
+            }
         } else {
             return $this->respond(["status" => false, "code" => [3001] ,"error" => 'token !!', 'description' => ''], 403);
         }
