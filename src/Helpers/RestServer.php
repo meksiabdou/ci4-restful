@@ -55,7 +55,7 @@ class RestServer extends ResourceController
                 return $this->respond(["status" => false, "code" => [3001], "error" => 'Error 500',  'description' => CI_DEBUG ? $e->getMessage() : '']);
             }
         } else {
-            return $this->respond(["status" => false, "code" => [3001] ,"error" => 'token !!', 'description' => ''], 403);
+            return $this->respond(["status" => false, "code" => [3001], "error" => 'token !!', 'description' => ''], 403);
         }
     }
 
@@ -78,11 +78,11 @@ class RestServer extends ResourceController
                 'method' => $method,
                 'params' => json_encode(['params' => $params, 'post' => $post, 'get' => $get], true),
                 'agent' => json_encode([
-                    'robot' => $agent->isRobot() ? $this->agent->robot(): false,
-                    'browser' => $agent->isBrowser() ?  $agent->getBrowser().'.'.$agent->getVersion() : false,
-                    'mobile' => $agent->isMobile() ? $agent->getMobile(): false,
+                    'robot' => $agent->isRobot() ? $this->agent->robot() : false,
+                    'browser' => $agent->isBrowser() ?  $agent->getBrowser() . '.' . $agent->getVersion() : false,
+                    'mobile' => $agent->isMobile() ? $agent->getMobile() : false,
                     'platform' => $agent->getPlatform(),
-                    'referrer' => $agent->isReferral()? $agent->getReferrer(): false,
+                    'referrer' => $agent->isReferral() ? $agent->getReferrer() : false,
                 ], true),
                 'date' => Time::createFromTimestamp(time(), $this->config->appTimezone),
                 'authorized' => 0,
@@ -122,7 +122,7 @@ class RestServer extends ResourceController
                             ->where('expires >=', date('Y-m-d H:i:s'))
                             ->get()
                             ->getRow();
-                        
+
                         if ($getToken) {
                             $data['authorized'] = 1;
                             $status = true;
@@ -167,7 +167,20 @@ class RestServer extends ResourceController
         return $this->respond(["status" => $status, "results" => $data], $statusCode);
     }
 
-    public function getUserId() {
+    public function getUserId()
+    {
         return $this->user;
+    }
+
+    public function setMethod($methods = [])
+    {
+        if (is_array($methods)) {
+            $this->array_methods = [...$this->array_methods, ...$methods];
+        } else {
+
+            if (!empty($methods)) {
+                $this->array_methods = [...$this->array_methods, $methods];
+            }
+        }
     }
 }

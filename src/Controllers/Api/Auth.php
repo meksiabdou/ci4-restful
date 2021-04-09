@@ -273,7 +273,7 @@ class Auth extends RestServer
 		}
 
 		// Success!
-		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created", $users], true);
+		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created"], true);
 	}
 
 	public function reSendActivateAccount()
