@@ -45,10 +45,15 @@ class RestServer extends ResourceController
 
     public function _remap($method, ...$params)
     {
+
         $auth = $this->auth($method, $params);
 
         if ($auth === true) {
-            return $this->$method(...$params);
+            try {
+                return $this->$method(...$params);
+            } catch (Exception $e) {
+                return $this->respond(["status" => false, "code" => [3001], "error" => 'Error 500',  'description' => CI_DEBUG ? $e->getMessage() : '']);
+            }
         } else {
             return $this->respond(["status" => false, "code" => [3001] ,"error" => 'token !!', 'description' => ''], 403);
         }
@@ -94,7 +99,7 @@ class RestServer extends ResourceController
 
                 if (in_array($method, $this->array_methods)) {
 
-                    if (!in_array($this->token, $this->token_app)) {
+                    if (!in_array($this->token, $this->token_app) || $agent->isRobot()) {
                         $data['authorized'] = 0;
                         $status = false;
                     } else {

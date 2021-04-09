@@ -7,7 +7,7 @@ class UserModel extends MythModel
     protected $allowedFields = [
         'email', 'username', 'password_hash', 'reset_hash', 'reset_at', 'reset_expires', 'activate_hash',
         'status', 'status_message', 'active', 'force_pass_reset', 'permissions', 'deleted_at',
-        'fullname', 'phone', 'country', 'remoteImage', 'image', 'referral_code', 'register_type',
+        'fullname', 'phone', 'country', 'wilaya' ,'remoteImage', 'image', 'referral_code', 'register_type',
     ];
 
     protected $validationRules = [
@@ -17,4 +17,23 @@ class UserModel extends MythModel
         'password_hash' => 'required',
         'fullname' => 'required',
     ];
+
+
+    public function getUserbyId($id)
+    {
+        $user = $this->where('id', $id)->first();
+
+        if($user)
+        {
+            unset($user->password_hash);
+            unset($user->reset_hash);
+            unset($user->reset_at);
+            unset($user->reset_expires);
+            unset($user->activate_hash);
+
+            return $user;
+        }
+
+        return false;
+    }
 }

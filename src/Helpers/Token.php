@@ -10,6 +10,7 @@ class Token
 
     private $loginModel;
     public $rememberLength;
+    public $response;
 
     public function __construct($rememberLength = 5)
     {
@@ -54,9 +55,6 @@ class Token
             'device' => $device,
             'expires' => $expires,
         ]);
-        //$this->loginModel->rememberUser($user->id, $selector, hash('sha256', $validator), $expires);
-
-        // Save it to the user's browser in a cookie.
 
         return $token;
     }

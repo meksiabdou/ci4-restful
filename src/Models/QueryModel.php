@@ -64,7 +64,8 @@ class QueryModel extends Model
         return $this->update();
     }
 
-    public function deleteData($where){
+    public function deleteData($where)
+    {
 
         foreach ($where as $key => $value) {
             $this->primaryKey = $key;
@@ -75,8 +76,7 @@ class QueryModel extends Model
     public function deleteDataWhere($where)
     {
 
-        if (!is_array($where)) 
-        {
+        if (!is_array($where)) {
             return false;
         }
 
@@ -125,14 +125,10 @@ class QueryModel extends Model
         return false;
     }
 
-    public function getDataBySearch($keywords = [], $limit = ["limit" => 10, "offset" => 0], $where = "", $Order_by = "id")
+
+
+    private function getCount($keywords = [], $where = [])
     {
-
-        $this->orderBy($Order_by, "DESC");
-
-        if (is_array($limit))  $this->limit($limit["limit"], $limit["offset"]);
-        if (!is_array($limit) && !empty($limit)) $this->limit($limit);
-
         if (is_array($keywords)) :
             foreach ($keywords as $key => $value)
                 $this->like($key, $value, 'both');
@@ -145,10 +141,37 @@ class QueryModel extends Model
 
         $result = $this->get()->getResult();
 
+        if ($result) {
+            return count($result);
+        }
+
+        return 0;
+    }
+
+    public function getDataBySearch($keywords = [], $limit = ["limit" => 10, "offset" => 0], $where = "", $Order_by = "id")
+    {
+
+        $this->orderBy($Order_by, "DESC");
+
+        if (is_array($keywords)) :
+            foreach ($keywords as $key => $value)
+                $this->like($key, $value, 'both');
+        endif;
+
+        if (is_array($where)) :
+            foreach ($where as $key => $value)
+                $this->where($key, mb_strtolower($value, 'UTF-8'));
+        endif;
+
+        if (is_array($limit))  $this->limit($limit["limit"], $limit["offset"]);
+        if (!is_array($limit) && !empty($limit)) $this->limit($limit);
+
+        $result = $this->get()->getResult();
+
         if ($result != null) {
             return [
                 'data' => $result,
-                'count_all' => $this->countAllResults(),
+                'count_all' => $this->getCount($keywords, $where),
             ];
         }
 

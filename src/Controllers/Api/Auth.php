@@ -38,7 +38,6 @@ class Auth extends RestServer
 		$this->users = new UserModel();
 		$this->loginModel = new LoginModel();
 		$this->config->defaultUserGroup = 'user';
-		$this->config->requireActivation = true;
 		$this->config->activeResetter = true;
 		$this->config->allowRemembering = true;
 		$this->config->validFields = ["email"];
@@ -70,9 +69,12 @@ class Auth extends RestServer
 
 	public function logout()
 	{
-		$uid = $this->request->getPost('login');
+		if ($this->request->getPost('login')) {
+			$uid = $this->request->getPost('login');
 
-		$this->loginModel->purgeRememberTokens($uid);
+			$this->loginModel->purgeRememberTokens($uid);
+		}
+
 
 		return $this->response_json([], true);
 	}
@@ -125,7 +127,6 @@ class Auth extends RestServer
 				}
 				return $this->response_json($user, true);
 			}
-
 		} catch (Exception $e) {
 
 			return $this->response_json(['code' => [3002], 'description' => $e->getMessage()], false);
@@ -137,6 +138,8 @@ class Auth extends RestServer
 	{
 		// Check if registration is allowed
 		$this->config->allowRegistration = true;
+		$this->config->requireActivation = true;
+
 
 		// Validate here first, since some things,
 		// like the password, can only be validated properly here.
@@ -205,26 +208,34 @@ class Auth extends RestServer
 					'min_length' => 3008,
 				]
 			],
+			'wilaya' => [
+				'label'  => 'wilaya',
+				'rules'  => "required",
+				'errors' => [
+					'required' => 3008,
+				]
+			],
 		];
 
 		//return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
-		
+
 		if (!$this->validate($rules)) {
 			$code = $this->handleErrors($this->validator->getErrors());
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
-		$this->config->personalFields = ['fullname', 'phone', 'country'];
+		$this->config->personalFields = ['fullname', 'phone', 'country', 'wilaya'];
 		$this->config->validFields = ["email"];
 
 		// Save the user
 		$allowedPostFields = array_merge(['password'], $this->config->validFields, $this->config->personalFields);
 
 		$userData = $this->request->getPost($allowedPostFields);
-		
+
 		$userData['username'] = explode("@", $this->request->getPost('email'))[0];
-		
+
 		$userData['referral_code'] = random_string('alnum', 8);
+
 
 		$user = new User($userData);
 
@@ -234,6 +245,7 @@ class Auth extends RestServer
 
 		$this->config->defaultUserGroup = 'user';
 
+		
 		if (!empty($this->config->defaultUserGroup)) {
 			$users = $this->users->withGroup($this->config->defaultUserGroup);
 		}
@@ -247,9 +259,8 @@ class Auth extends RestServer
 		if ($this->isReferralsPrograme && $this->request->getPost('referral_code')) {
 			$queryRef = new QueryModel('referrals');
 			$referral = $this->users->where('referral_code', $this->request->getPost('referral_code'))->first();
-			$queryRef->insertToDb([["user_id" => $users->id, "referral_id" => $referral->id]]);
+			$queryRef->insertToDb(["user_id" => $users->id, "referral_id" => $referral->id]);
 		}
-
 
 		if ($this->config->requireActivation !== false) {
 
@@ -262,7 +273,7 @@ class Auth extends RestServer
 		}
 
 		// Success!
-		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created"], true);
+		return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created", $users], true);
 	}
 
 	public function reSendActivateAccount()
@@ -292,7 +303,7 @@ class Auth extends RestServer
 
 		// Success!
 		if ($sent) {
-			return $this->response_json(['code' => [2003], 'description' => "Account Successfully Created"], true);
+			return $this->response_json(['code' => [2003], 'description' => "Successfully Send"], true);
 		}
 
 		return $this->response_json(['code' => [3004], 'description' => "mail not send"], false);
@@ -322,11 +333,11 @@ class Auth extends RestServer
 
 		$sent = $this->email->forgotEmailSent($user);
 
-		if (!$sent) {
-			return $this->response_json(['code' => [3005], 'description' => "mail not send"], false);
+		if ($sent === true) {
+			return $this->response_json(['code' => [2001], 'description' => "forgotEmailSent"], true);
 		}
 
-		return $this->response_json(['code' => [2001], 'description' => "forgotEmailSent"], true);
+		return $this->response_json(['code' => [3005], 'description' => "mail not send", 'error' => $sent], false);
 	}
 
 	/**
@@ -409,7 +420,7 @@ class Auth extends RestServer
 		$user->reset_at 		= date('Y-m-d H:i:s');
 		$user->reset_expires    = null;
 		$user->force_pass_reset = false;
-		
+
 		$this->users->save($user);
 
 		return $this->response_json(['code' => [2002], 'description' => 'resetSuccess'], true);
@@ -442,12 +453,34 @@ class Auth extends RestServer
 					'required' => 3008,
 				]
 			],
+			'oldEmail' => [
+				'label'  => 'oldEmail',
+				'rules'  => "required|valid_email",
+				'errors' => [
+					'valid_email' => 3006,
+					'required' => 3008,
+				]
+			],
+			'password' => [
+				'label'  => 'password',
+				'rules'  => "required",
+				'errors' => [
+					'required' => 3008,
+				]
+			],
 			'phone' => [
 				'label'  => 'phone',
 				'rules'  => "required|integer|is_unique[users.phone,id,$uid]",
 				'errors' => [
 					'is_unique' => 3007,
 					'integer' => 3007,
+					'required' => 3008,
+				]
+			],
+			'wilaya' => [
+				'label'  => 'wilaya',
+				'rules'  => "required",
+				'errors' => [
 					'required' => 3008,
 				]
 			],
@@ -459,15 +492,19 @@ class Auth extends RestServer
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
-		$user = $this->users->where('id', $uid)->first();
+		$email = $this->request->getPost('oldEmail');
+		$password = $this->request->getPost('password');
 
-		if (!$user) {
-			return $this->response_json(['code' => [3002], 'description' => ''], false);
+		if (!$this->auth->attempt(['email' => $email, 'password' => $password], false)) {
+			return $this->response_json(['code' => [3002], 'description' => $this->auth->error()], false);
 		}
+
+		$user = $this->auth->user();
 
 		$user->fullname = $this->request->getPost('fullname');
 		$user->phone = $this->request->getPost('phone');
 		$user->email = $this->request->getPost('email');
+		$user->wilaya = $this->request->getPost('wilaya');
 
 		try {
 			$update = $this->users->save($user);
@@ -477,7 +514,7 @@ class Auth extends RestServer
 			}
 			return $this->response_json(['code' => [2002], 'description' => 'Edited successfully'], true);
 		} catch (Exception $e) {
-			return $this->response_json(['code' => [3012], 'description' => $e->getMessage()], false);
+			return $this->response_json(['code' => [2002], 'description' => $e->getMessage()], true);
 		}
 	}
 
@@ -503,9 +540,10 @@ class Auth extends RestServer
 			],
 			'newPassword' => [
 				'label'  => 'newPassword',
-				'rules'  => "required|strong_password",
+				'rules'  => "required|min_length[8]",
 				'errors' => [
-					'strong_password' => 3009,
+					//'strong_password' => 3009,
+					'min_length' => 3009,
 					'required' => 3008,
 				]
 			],
