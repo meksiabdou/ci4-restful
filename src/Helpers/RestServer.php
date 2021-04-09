@@ -72,7 +72,7 @@ class RestServer extends ResourceController
 
             $data = [
                 'token' => null,
-                'uri' => $this->request->getServer(['REQUEST_URI']),
+                'uri' => $this->request->getServer('REQUEST_URI'),
                 'ip_address' => $this->request->getIPAddress(),
                 'method_request' => $this->request->getMethod(TRUE),
                 'method' => $method,
