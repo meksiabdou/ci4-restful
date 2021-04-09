@@ -36,7 +36,7 @@ class RestServer extends ResourceController
         'localisation'
     ];
 
-    protected $users;
+    protected $user = null;
 
     public function __construct()
     {
@@ -117,10 +117,11 @@ class RestServer extends ResourceController
                             ->where('expires >=', date('Y-m-d H:i:s'))
                             ->get()
                             ->getRow();
-
+                        
                         if ($getToken) {
                             $data['authorized'] = 1;
                             $status = true;
+                            $this->user = $getToken->user_id;
                         } else {
                             $data['authorized'] = 0;
                             $status = false;
@@ -159,5 +160,9 @@ class RestServer extends ResourceController
     {
         $this->format = 'json';
         return $this->respond(["status" => $status, "results" => $data], $statusCode);
+    }
+
+    public function getUserId() {
+        return $this->user;
     }
 }

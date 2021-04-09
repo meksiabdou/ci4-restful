@@ -22,20 +22,7 @@ class Email
     public function __construct()
     {
 
-        //contact@recashit.com
         $this->config = new CEmail();
-        $this->config->fromEmail = "no-reply@recashit.net";
-        $this->config->fromName = "Recashit - Cashback";
-        $this->config->protocol = "smtp";
-
-
-        $this->config->SMTPHost = "";
-        $this->config->SMTPUser = "";
-        $this->config->SMTPPass = "";
-
-        $this->config->SMTPPort = 587;
-        $this->config->SMTPTimeout = 30;
-        $this->config->SMTPCrypto = "";
 
         $this->email = Services::email();
 
