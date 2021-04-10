@@ -85,7 +85,6 @@ class Auth extends RestServer
 		$rules = [
 			'identity'	=> 'required',
 			'password' => 'required',
-			'device' => 'required',
 		];
 
 		if ($this->config->validFields == ['email']) {
@@ -98,7 +97,6 @@ class Auth extends RestServer
 
 		$identity = $this->request->getPost('identity');
 		$password = $this->request->getPost('password');
-		$device = $this->request->getPost('device');
 		$remember = false;
 
 
@@ -114,8 +112,6 @@ class Auth extends RestServer
 			}
 
 			$user = $this->auth->user();
-
-			$user->device = $device;
 
 			if ($user) {
 				$user =  $token->generateToken($user);

@@ -10,12 +10,14 @@ class Token
 
     private $loginModel;
     public $rememberLength;
-    public $response;
+    protected $request;
 
     public function __construct($rememberLength = 5)
     {
         $this->loginModel = new LoginModel();
         $this->rememberLength = $rememberLength * DAY;
+        $this->request = service('request');
+
     }
 
     function generateToken($user)
@@ -37,11 +39,13 @@ class Token
     {
 
         $this->loginModel->purgeOldRememberTokens();
+        $agent = $this->request->getUserAgent();
 
         $selector  = bin2hex(random_bytes(12));
         $validator = bin2hex(random_bytes(20));
         $expires   = date('Y-m-d H:i:s', time() + $this->rememberLength);
-        $device = $user->device;
+        //$device = $user->device;
+        $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
 
         $token = $selector . ':' . $validator;
 

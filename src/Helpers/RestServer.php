@@ -90,16 +90,18 @@ class RestServer extends ResourceController
 
             $status = false;
 
-            if ($this->request->getHeader('token')) {
+            if ($this->request->getHeader('token') && !$agent->isRobot()) {
 
                 $this->token = $this->request->getHeader('token')->getValue();
                 $this->token_app = (isset($this->config->token_app)) ? $this->config->token_app : '';
+
+                $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
 
                 $data['token'] = $this->token;
 
                 if (in_array($method, $this->array_methods)) {
 
-                    if (!in_array($this->token, $this->token_app) || $agent->isRobot()) {
+                    if (!in_array($this->token, $this->token_app)) {
                         $data['authorized'] = 0;
                         $status = false;
                     } else {
@@ -124,9 +126,16 @@ class RestServer extends ResourceController
                             ->getRow();
 
                         if ($getToken) {
-                            $data['authorized'] = 1;
-                            $status = true;
-                            $this->user = $getToken->user_id;
+
+                            if (strtolower($device) === strtolower($getToken->device)) {
+                                $data['authorized'] = 1;
+                                $status = true;
+                                $this->user = $getToken->user_id;
+                            } else {
+                                $data['authorized'] = 0;
+                                $status = false;
+                                $query->deleteDataWhere(['id' => $getToken->id]);
+                            }
                         } else {
                             $data['authorized'] = 0;
                             $status = false;
