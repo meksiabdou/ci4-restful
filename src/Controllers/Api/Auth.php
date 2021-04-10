@@ -93,7 +93,7 @@ class Auth extends RestServer
 		}
 
 		if (!$this->validate($rules)) {
-			return $this->response_json(['code' => [3002], 'description' => $this->validator->getErrors()], false);
+			return $this->response_json(['code' => [3002], 'description' => 'validation'], false);
 		}
 
 		$identity = $this->request->getPost('identity');
@@ -318,7 +318,7 @@ class Auth extends RestServer
 		];
 
 		if (!$this->validate($rules)) {
-			return $this->response_json(['code' => [3002], 'description' => $this->validator->getErrors()], false);
+			return $this->response_json(['code' => [3002], 'description' => 'validation'], false);
 		}
 
 		$user = $this->users->where('email', $this->request->getPost('email'))->first();
@@ -393,7 +393,7 @@ class Auth extends RestServer
 		];
 
 		/*if (!$this->validate($rules)) {
-			return $this->response_json(['code' => [3002], 'description' => $this->validator->getErrors()], false);
+			return $this->response_json(['code' => [3002], 'description' => 'validation'], false);
 		}*/
 
 		if (!$this->validate($rules)) {
@@ -559,20 +559,14 @@ class Auth extends RestServer
 
 		if (!$this->validate($rules)) {
 			$code = $this->handleErrors($this->validator->getErrors());
-			return $this->response_json(['code' => $code, 'description' => $this->validator->getErrors()], false);
+			return $this->response_json(['code' => $code, 'description' => 'validation'], false);
 		}
 
 		$email = $this->request->getPost('email');
 		$password = $this->request->getPost('password');
 
-		try {
-			if (!$this->auth->attempt(['email' => $email, 'password' => $password], false)) {
-				return $this->response_json(['code' => [3002], 'description' => $this->auth->error()], false);
-			}
-		} catch (Exception $e) {
-			if (!$this->auth->user()) {
-				return $this->response_json(['code' => [3002], 'description' => $e->getMessage()], false);
-			}
+		if (!$this->auth->attempt(['email' => $email, 'password' => $password], false)) {
+			return $this->response_json(['code' => [3002], 'description' => $this->auth->error()], false);
 		}
 
 		$user = $this->auth->user();
