@@ -45,26 +45,23 @@ class RestServer extends ResourceController
 
     public function _remap($method, ...$params)
     {
-
-        $auth = $this->auth($method, $params);
-
-        if ($auth === true) {
-            try {
+        try {
+            $auth = $this->auth($method, $params);
+            if ($auth === true) {
                 return $this->$method(...$params);
-            } catch (Exception $e) {
-                return $this->respond(["status" => false, "code" => [3001], "error" => 'Error 500',  'description' => CI_DEBUG ? $e->getMessage() : '']);
             }
-        } else {
             return $this->respond(["status" => false, "code" => [3001], "error" => 'token !!', 'description' => ''], 403);
+        } catch (Exception $e) {
+            return $this->respond(["status" => false, "code" => [3001], "error" => 'Error 500',  'description' => CI_DEBUG ? $e->getMessage() : ''], 500);
         }
     }
 
     private function auth($method, $params)
     {
 
-        $this->config = new Configs();
-
         try {
+
+            $this->config = new Configs();
 
             $post = [];
             $get = $this->request->getGet();
@@ -153,8 +150,7 @@ class RestServer extends ResourceController
             $this->logs($data);
             return $status;
         } catch (Exception $e) {
-            //return $e->getMessage();
-            return false;
+            throw new Exception($e);
         }
     }
 

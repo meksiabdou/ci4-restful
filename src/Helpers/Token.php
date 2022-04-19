@@ -17,7 +17,6 @@ class Token
         $this->loginModel = new LoginModel();
         $this->rememberLength = $rememberLength * DAY;
         $this->request = service('request');
-
     }
 
     function generateToken($user)
@@ -29,7 +28,7 @@ class Token
         unset($user->reset_expires);
         unset($user->activate_hash);
 
-        
+
         $user->token = $this->generate_key($user);
 
         return $user;
@@ -52,14 +51,18 @@ class Token
         // Store it in the database
         $query = new QueryModel('auth_tokens');
 
-        $query->insertToDb([
+        $response = $query->insertToDb([
             'user_id' => $user->id,
             'selector' => $selector,
             'hashedValidator' => hash('sha256', $validator),
             'device' => $device,
             'expires' => $expires,
         ]);
+        
+        if ($response) {
+            return $token;
+        }
 
-        return $token;
+        return null;
     }
 }
