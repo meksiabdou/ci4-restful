@@ -56,6 +56,11 @@ class RestServer extends ResourceController
         }
     }
 
+    protected function device() {
+        $agent = $this->request->getUserAgent();
+        return  $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
+    }
+
     private function auth($method, $params)
     {
 
@@ -92,7 +97,7 @@ class RestServer extends ResourceController
                 $this->token = $this->request->getHeader('token')->getValue();
                 $this->token_app = (isset($this->config->token_app)) ? $this->config->token_app : '';
 
-                $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
+                $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $this->device();
 
                 $data['token'] = $this->token;
 

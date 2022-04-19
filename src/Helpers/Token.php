@@ -19,6 +19,11 @@ class Token
         $this->request = service('request');
     }
 
+    protected function device() {
+        $agent = $this->request->getUserAgent();
+        return  $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
+    }
+
     function generateToken($user)
     {
 
@@ -44,7 +49,7 @@ class Token
         $validator = bin2hex(random_bytes(20));
         $expires   = date('Y-m-d H:i:s', time() + $this->rememberLength);
         //$device = $user->device;
-        $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $agent->getBrowser() . '.' . $agent->getVersion() . '.' . $agent->getPlatform();
+        $device = $this->request->getHeader('device') ? $this->request->getHeader('device')->getValue() : $this->device();
 
         $token = $selector . ':' . $validator;
 
