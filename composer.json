@@ -17,12 +17,12 @@
     ],
     "minimum-stability": "beta",
     "require": {
-        "php": ">=7.2"
+        "php": ">=7.3"
     },
     "require-dev": {
-        "codeigniter4/framework": "^4",
-        "agungsugiarto/codeigniter4-cors": "^1.0",
-        "myth/auth": "^1.0@beta"
+        "codeigniter4/framework": "^v4.2.1",
+        "agungsugiarto/codeigniter4-cors": "^v2.0.0",
+        "myth/auth": "^v1.0.1"
     },
     "autoload": {
         "psr-4": {
