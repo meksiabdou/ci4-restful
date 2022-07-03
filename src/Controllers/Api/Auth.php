@@ -442,21 +442,22 @@ class Auth extends RestServer
 			],
 			'email' => [
 				'label'  => 'email',
-				'rules'  => "required|valid_email|is_unique[users.email,id,$uid]",
+				//'rules'  => "required|valid_email|is_unique[users.email,id,$uid]",
+				'rules'  => "required|valid_email",
 				'errors' => [
-					'is_unique' => 3006,
+					// 'is_unique' => 3006,
 					'valid_email' => 3006,
 					'required' => 3008,
 				]
 			],
-			'oldEmail' => [
+			/*'oldEmail' => [
 				'label'  => 'oldEmail',
 				'rules'  => "required|valid_email",
 				'errors' => [
 					'valid_email' => 3006,
 					'required' => 3008,
 				]
-			],
+			],*/
 			'password' => [
 				'label'  => 'password',
 				'rules'  => "required",
@@ -488,7 +489,7 @@ class Auth extends RestServer
 			return $this->response_json(['code' => $code, 'description' => 'Validation'], false);
 		}
 
-		$email = $this->request->getPost('oldEmail');
+		$email = $this->request->getPost('email');
 		$password = $this->request->getPost('password');
 
 		if (!$this->auth->attempt(['email' => $email, 'password' => $password], false)) {
@@ -499,7 +500,7 @@ class Auth extends RestServer
 
 		$user->fullname = $this->request->getPost('fullname');
 		$user->phone = $this->request->getPost('phone');
-		$user->email = $this->request->getPost('email');
+		// $user->email = $this->request->getPost('email');
 		$user->wilaya = $this->request->getPost('wilaya');
 
 		try {
